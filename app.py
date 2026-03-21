@@ -1,15 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Streamlit Evaluation Interface for GPR Buried Object Detection.
-
-Usage:
-    streamlit run app.py
-
-Features:
-    - Upload a GPR B-scan image
-    - Detect and classify buried objects (Utility vs Cavity)
-    - Side-by-side visualization with colored bounding boxes
-    - Detection results table with confidence scores
+Premium Streamlit Evaluation Interface for GPR Buried Object Detection.
 """
 
 import streamlit as st
@@ -18,147 +9,229 @@ from PIL import Image
 import os
 import cv2
 
-
 # ──────────────────────────────────────────────
 # Page Configuration
 # ──────────────────────────────────────────────
 st.set_page_config(
-    page_title="GPR Buried Object Detector",
-    page_icon="🔍",
+    page_title="DeepGround | GPR AI",
+    page_icon="📡",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
 # ──────────────────────────────────────────────
-# Custom CSS
+# Ultra-Premium Custom CSS
 # ──────────────────────────────────────────────
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
-    .main { font-family: 'Inter', sans-serif; }
+    /* Global Typography & Theme */
+    html, body, [class*="css"] {
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
+    }
 
+    /* Deep Space Gradient Background */
     .stApp {
-        background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%);
+        background-color: #09090b;
+        background-image: 
+            radial-gradient(circle at 15% 50%, rgba(79, 70, 229, 0.08) 0%, transparent 35%),
+            radial-gradient(circle at 85% 30%, rgba(236, 72, 153, 0.06) 0%, transparent 35%),
+            radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.04) 0%, transparent 40%);
+        background-attachment: fixed;
     }
 
-    .header-container {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 2rem;
-        border-radius: 16px;
-        margin-bottom: 2rem;
+    /* Frosted Glass Sidebar */
+    [data-testid="stSidebar"] {
+        background-color: rgba(9, 9, 11, 0.6) !important;
+        backdrop-filter: blur(20px) saturate(150%);
+        border-right: 1px solid rgba(255, 255, 255, 0.03);
+    }
+    
+    [data-testid="stSidebar"] hr {
+        border-color: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Hero Panel (Header) */
+    .hero-panel {
+        background: linear-gradient(145deg, rgba(24, 24, 27, 0.6), rgba(9, 9, 11, 0.8));
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.7);
+        border-radius: 28px;
+        padding: 3.5rem 2rem;
         text-align: center;
-        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+        margin-bottom: 3rem;
+        backdrop-filter: blur(16px);
+        animation: fadeInDown 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
-
-    .header-container h1 {
-        color: white;
-        font-size: 2.2rem;
-        font-weight: 700;
-        margin: 0;
-        letter-spacing: -0.5px;
-    }
-
-    .header-container p {
-        color: rgba(255,255,255,0.85);
-        font-size: 1.05rem;
-        margin-top: 0.5rem;
-    }
-
-    .stat-card {
-        background: rgba(255,255,255,0.05);
-        border: 1px solid rgba(255,255,255,0.1);
-        border-radius: 12px;
-        padding: 1.2rem;
-        text-align: center;
-        backdrop-filter: blur(10px);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .stat-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-    }
-
-    .stat-value {
-        font-size: 2rem;
-        font-weight: 700;
-        background: linear-gradient(135deg, #667eea, #764ba2);
+    .hero-panel h1 {
+        font-size: 3.5rem;
+        font-weight: 800;
+        background: linear-gradient(to right, #818cf8, #c084fc, #f472b6);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.03em;
+        line-height: 1.2;
+    }
+    .hero-panel p {
+        color: #a1a1aa;
+        font-size: 1.15rem;
+        font-weight: 400;
+        max-width: 600px;
+        margin: 0 auto;
+        line-height: 1.6;
     }
 
+    /* Metric/Glass Cards */
+    .glass-card {
+        background: rgba(24, 24, 27, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        border-radius: 20px;
+        padding: 1.75rem;
+        backdrop-filter: blur(12px);
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        opacity: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+    }
+    .glass-card:hover {
+        border-color: rgba(255, 255, 255, 0.1);
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px -8px rgba(0, 0, 0, 0.4);
+        background: rgba(39, 39, 42, 0.5);
+    }
+    .stat-number {
+        font-size: 3rem;
+        font-weight: 800;
+        color: #f8fafc;
+        line-height: 1.1;
+        margin-bottom: 0.25rem;
+    }
+    .stat-number.blue { background: linear-gradient(to right, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .stat-number.red { background: linear-gradient(to right, #fb7185, #f43f5e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    
     .stat-label {
         font-size: 0.85rem;
-        color: rgba(255,255,255,0.6);
+        color: #94a3b8;
         text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-top: 0.3rem;
-    }
-
-    .utility-badge {
-        background: linear-gradient(135deg, #3b82f6, #2563eb);
-        color: white;
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-size: 0.8rem;
+        letter-spacing: 0.1em;
         font-weight: 600;
     }
 
-    .cavity-badge {
-        background: linear-gradient(135deg, #ef4444, #dc2626);
-        color: white;
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-size: 0.8rem;
-        font-weight: 600;
-    }
-
-    .detection-card {
-        background: rgba(255,255,255,0.05);
-        border: 1px solid rgba(255,255,255,0.1);
-        border-radius: 12px;
-        padding: 1rem;
-        margin-bottom: 0.5rem;
-    }
-
-    div[data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
-    }
-
-    .upload-section {
-        background: rgba(255,255,255,0.03);
-        border: 2px dashed rgba(102, 126, 234, 0.4);
+    /* Elegant Detection Item */
+    .detection-row {
+        background: rgba(24, 24, 27, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.03);
         border-radius: 16px;
-        padding: 2rem;
-        text-align: center;
-        transition: border-color 0.3s ease;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: all 0.3s ease;
+        animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        opacity: 0;
+    }
+    .detection-row:hover {
+        background: rgba(39, 39, 42, 0.6);
+        border-color: rgba(255, 255, 255, 0.08);
+    }
+    
+    .det-left { display: flex; align-items: center; gap: 1rem; }
+    .det-right { text-align: right; }
+    .det-coords { font-size: 0.8rem; color: #71717a; font-family: monospace; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 6px; }
+
+    /* Badges */
+    .badge {
+        padding: 0.35rem 0.85rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        display: inline-block;
+    }
+    .badge-utility {
+        background: rgba(56, 189, 248, 0.1);
+        color: #38bdf8;
+        border: 1px solid rgba(56, 189, 248, 0.2);
+    }
+    .badge-cavity {
+        background: rgba(244, 63, 94, 0.1);
+        color: #f43f5e;
+        border: 1px solid rgba(244, 63, 94, 0.2);
     }
 
-    .upload-section:hover {
-        border-color: rgba(102, 126, 234, 0.8);
+    /* Images Panels */
+    .image-panel {
+        background: rgba(9, 9, 11, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        padding: 1rem;
+        border-radius: 24px;
+        box-shadow: inset 0 2px 20px rgba(0,0,0,0.5);
+    }
+
+    /* Custom Uploader Dropzone styling */
+    [data-testid="stFileUploadDropzone"] {
+        background-color: rgba(24, 24, 27, 0.3) !important;
+        border: 2px dashed rgba(255, 255, 255, 0.08) !important;
+        border-radius: 24px !important;
+        padding: 3rem !important;
+        transition: all 0.3s ease !important;
+    }
+    [data-testid="stFileUploadDropzone"]:hover {
+        border-color: #818cf8 !important;
+        background-color: rgba(129, 140, 248, 0.03) !important;
+    }
+    .upload-hint {
+        text-align: center;
+        margin-top: -15px;
+        color: #71717a;
+        font-size: 0.9rem;
+    }
+
+    /* Animations */
+    @keyframes fadeInDown {
+        from { opacity: 0; transform: translateY(-30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .d-1 { animation-delay: 0.1s; }
+    .d-2 { animation-delay: 0.2s; }
+    .d-3 { animation-delay: 0.3s; }
+    .d-4 { animation-delay: 0.4s; }
+    .d-5 { animation-delay: 0.5s; }
+    
+    /* Headers inside markdown */
+    h3, h4 {
+        font-weight: 700 !important;
+        letter-spacing: -0.02em;
+        margin-bottom: 1.5rem !important;
     }
 </style>
 """, unsafe_allow_html=True)
 
 
 # ──────────────────────────────────────────────
-# Helper Functions
+# Architecture / Helpers
 # ──────────────────────────────────────────────
-CLASS_COLORS = {
-    0: (59, 130, 246),   # Blue for Utility (BGR)
-    1: (68, 68, 239),    # Red for Cavity (BGR)
-}
-CLASS_COLORS_RGB = {
-    0: (59, 130, 246),   # Blue
-    1: (239, 68, 68),    # Red
-}
+# Vibrant BGR colors for OpenCV drawing
+COLOR_UTILITY = (255, 187, 51)  # Vivid Skublue/Cyan (OpenCV uses BGR -> #33bbff)
+COLOR_CAVITY  = (81, 63, 244)   # Vivid Rose/Pink (OpenCV uses BGR -> #f43f51)
+
 CLASS_NAMES = {0: "Utility", 1: "Cavity"}
-CLASS_ICONS = {0: "🔵", 1: "🔴"}
 
-
-def draw_detections(image, results, conf_threshold=0.25):
-    """Draw bounding boxes on the image and return detection data."""
+def draw_premium_detections(image, results, conf_threshold=0.25):
+    """Draw highly-styled bounding boxes on the image and return detection metrics."""
     img = image.copy()
     detections = []
 
@@ -173,197 +246,204 @@ def draw_detections(image, results, conf_threshold=0.25):
                 cls_id = int(box.cls[0])
                 x1, y1, x2, y2 = map(int, box.xyxy[0])
 
-                # Colors (BGR for OpenCV)
-                if cls_id == 0:
-                    color = (246, 130, 59)  # Blue in BGR
-                else:
-                    color = (68, 68, 239)   # Red in BGR
+                # Assign colors based on class
+                color = COLOR_UTILITY if cls_id == 0 else COLOR_CAVITY
+                
+                # Draw thick, beautiful bounding box
+                cv2.rectangle(img, (x1, y1), (x2, y2), color, 3)
 
-                # Draw box
-                cv2.rectangle(img, (x1, y1), (x2, y2), color, 2)
-
-                # Label background
-                label = f"{CLASS_NAMES.get(cls_id, f'cls_{cls_id}')} {conf:.0%}"
-                (tw, th), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
-                cv2.rectangle(img, (x1, y1 - th - 8), (x1 + tw + 4, y1), color, -1)
-                cv2.putText(img, label, (x1 + 2, y1 - 4),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+                # Draw solid background for label
+                label = f"{CLASS_NAMES.get(cls_id, 'Anomaly')} {conf:.0%}"
+                (tw, th), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_DUPLEX, 0.55, 1)
+                
+                # Dark transparent backing for text
+                overlay = img.copy()
+                cv2.rectangle(overlay, (x1, y1 - th - 12), (x1 + tw + 10, y1), (20, 20, 20), -1)
+                cv2.addWeighted(overlay, 0.7, img, 0.3, 0, img)
+                
+                # Vibrant text border for legibility
+                cv2.putText(img, label, (x1 + 5, y1 - 6), cv2.FONT_HERSHEY_DUPLEX, 0.55, color, 1)
 
                 detections.append({
-                    "Class": CLASS_NAMES.get(cls_id, f"Unknown ({cls_id})"),
-                    "Confidence": f"{conf:.1%}",
+                    "Class": CLASS_NAMES.get(cls_id, "Unknown"),
+                    "Confidence": conf,
                     "X1": x1, "Y1": y1, "X2": x2, "Y2": y2,
                     "cls_id": cls_id,
                 })
 
+    # Sort detections by confidence (highest first)
+    detections.sort(key=lambda x: x["Confidence"], reverse=True)
     return img, detections
 
 
-@st.cache_resource
+@st.cache_resource(show_spinner=False)
 def load_model(model_path):
-    """Load and cache the YOLO model."""
     from ultralytics import YOLO
     return YOLO(model_path)
 
 
 # ──────────────────────────────────────────────
-# Sidebar
+# Sidebar Structure
 # ──────────────────────────────────────────────
 with st.sidebar:
-    st.markdown("### ⚙️ Settings")
-
-    # Model path
+    st.markdown("<h2 style='font-weight:800; color:white; letter-spacing:-1px; margin-bottom: 2rem;'>DeepGround</h2>", unsafe_allow_html=True)
+    
+    st.markdown("<p style='color:#a1a1aa; font-weight:600; font-size:0.8rem; text-transform:uppercase; letter-spacing:1px;'>Model Configuration</p>", unsafe_allow_html=True)
+    
+    # Sleek Model Path Input
     default_model = "runs/detect/gpr_multiclass/weights/best.pt"
     model_path = st.text_input(
-        "Model path",
+        "Weights Path",
         value=default_model,
-        help="Path to the trained YOLOv8 .pt weights file",
     )
 
-    # Confidence threshold
+    # Sleek Threshold Slider
     conf_threshold = st.slider(
-        "Confidence threshold",
-        min_value=0.0,
-        max_value=1.0,
-        value=0.25,
-        step=0.05,
-        help="Only show detections above this confidence",
+        "Confidence Threshold",
+        min_value=0.0, max_value=1.0, value=0.25, step=0.05,
     )
 
-    st.divider()
+    st.markdown("<hr style='margin: 2rem 0;'>", unsafe_allow_html=True)
 
-    st.markdown("### 📋 Class Legend")
+    # Legend Display
+    st.markdown("<p style='color:#a1a1aa; font-weight:600; font-size:0.8rem; text-transform:uppercase; letter-spacing:1px;'>Detection Legend</p>", unsafe_allow_html=True)
+    
     st.markdown(
-        '<span class="utility-badge">🔵 Utility</span> '
-        "&nbsp; Pipes, cables",
-        unsafe_allow_html=True,
-    )
-    st.markdown(
-        '<span class="cavity-badge">🔴 Cavity</span> '
-        "&nbsp; Underground voids",
-        unsafe_allow_html=True,
+        """
+        <div style='display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;'>
+            <div style='display: flex; align-items: center; gap: 1rem;'>
+                <div class='badge badge-utility'>Utility</div>
+                <span style='color:#d4d4d8; font-size:0.9rem;'>Pipes, Cables</span>
+            </div>
+            <div style='display: flex; align-items: center; gap: 1rem;'>
+                <div class='badge badge-cavity'>Cavity</div>
+                <span style='color:#d4d4d8; font-size:0.9rem;'>Subsurface Voids</span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True
     )
 
-    st.divider()
-
-    st.markdown("### ℹ️ About")
-    st.markdown(
-        "This app uses **YOLOv8** to detect hyperbolic "
-        "signatures in GPR B-scan images, classifying "
-        "them as buried utilities or cavities."
-    )
+    st.markdown("<hr style='margin: 2rem 0;'>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#52525b; font-size:0.8rem; text-align:center;'>Powered by YOLOv8 Vision Architecture</p>", unsafe_allow_html=True)
 
 
 # ──────────────────────────────────────────────
-# Main Content
+# Main Dashboard
 # ──────────────────────────────────────────────
 
-# Header
+# Massive Premium Hero Banner
 st.markdown("""
-<div class="header-container">
-    <h1>🔍 GPR Buried Object Detector</h1>
-    <p>Upload a Ground Penetrating Radar B-scan image to detect and classify buried objects</p>
+<div class="hero-panel">
+    <h1>Subsurface Anomaly Intelligence</h1>
+    <p>Upload Ground Penetrating Radar B-scans to instantly identify and classify buried anomalies using advanced computer vision.</p>
 </div>
 """, unsafe_allow_html=True)
 
-# Check if model exists
 model_exists = os.path.exists(model_path)
-
 if not model_exists:
-    st.warning(
-        f"⚠️ Model not found at `{model_path}`. "
-        "Please train the model first using `python train.py`, "
-        "or update the model path in the sidebar."
-    )
+    st.error(f"⚠️ **Model file not found** at `{model_path}`. Ensure you have run the training script.")
 
-# File uploader
+# Premium Uploader
+st.markdown("<h3 style='color: white; margin-bottom: 0.5rem;'>Input Telemetry</h3>", unsafe_allow_html=True)
 uploaded_file = st.file_uploader(
-    "Upload a GPR B-scan image",
+    "",
     type=["jpg", "jpeg", "png"],
-    help="Upload a 224×224 GPR scan patch",
 )
 
-if uploaded_file is not None:
-    # Load image
+if uploaded_file is None:
+    st.markdown("<p class='upload-hint'>Drag and drop a 224×224 B-scan patch to begin analysis.</p>", unsafe_allow_html=True)
+
+if uploaded_file is not None and model_exists:
+    # Processing
     pil_image = Image.open(uploaded_file).convert("RGB")
     img_array = np.array(pil_image)
 
-    if model_exists:
-        # Load model and run inference
-        with st.spinner("🔄 Running detection..."):
-            model = load_model(model_path)
-            results = model(img_array, conf=conf_threshold, verbose=False)
+    # Inference without breaking the UI flow
+    model = load_model(model_path)
+    results = model(img_array, conf=conf_threshold, verbose=False)
 
-        # Draw detections
-        annotated_img, detections = draw_detections(img_array, results, conf_threshold)
+    annotated_img, detections = draw_premium_detections(img_array, results, conf_threshold)
 
-        # ── Summary Stats ──
-        n_total = len(detections)
-        n_utility = sum(1 for d in detections if d["cls_id"] == 0)
-        n_cavity = sum(1 for d in detections if d["cls_id"] == 1)
+    st.markdown("<hr style='margin: 3rem 0; border-color: rgba(255,255,255,0.05);'>", unsafe_allow_html=True)
 
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.markdown(
-                f'<div class="stat-card">'
-                f'<div class="stat-value">{n_total}</div>'
-                f'<div class="stat-label">Total Detections</div></div>',
-                unsafe_allow_html=True,
-            )
-        with col2:
-            st.markdown(
-                f'<div class="stat-card">'
-                f'<div class="stat-value">{n_utility}</div>'
-                f'<div class="stat-label">🔵 Utilities</div></div>',
-                unsafe_allow_html=True,
-            )
-        with col3:
-            st.markdown(
-                f'<div class="stat-card">'
-                f'<div class="stat-value">{n_cavity}</div>'
-                f'<div class="stat-label">🔴 Cavities</div></div>',
-                unsafe_allow_html=True,
-            )
+    # ── METRIC CARDS ──
+    st.markdown("<h3 style='color: white;'>Analysis Overview</h3>", unsafe_allow_html=True)
+    
+    n_total = len(detections)
+    n_util = sum(1 for d in detections if d["cls_id"] == 0)
+    n_cav = sum(1 for d in detections if d["cls_id"] == 1)
 
-        st.markdown("<br>", unsafe_allow_html=True)
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        st.markdown(f"""
+        <div class="glass-card d-1">
+            <div class="stat-number">{n_total}</div>
+            <div class="stat-label">Total Signatures</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with c2:
+        st.markdown(f"""
+        <div class="glass-card d-2">
+            <div class="stat-number blue">{n_util}</div>
+            <div class="stat-label">Verified Utilities</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with c3:
+        st.markdown(f"""
+        <div class="glass-card d-3">
+            <div class="stat-number red">{n_cav}</div>
+            <div class="stat-label">Verified Cavities</div>
+        </div>
+        """, unsafe_allow_html=True)
 
-        # ── Side-by-side images ──
-        left, right = st.columns(2)
+    st.markdown("<br><br>", unsafe_allow_html=True)
 
-        with left:
-            st.markdown("#### 📷 Original Image")
-            st.image(pil_image, use_container_width=True)
+    # ── VISUALIZATION PANELS ──
+    col_left, col_right = st.columns(2)
+    
+    with col_left:
+        st.markdown("<h4 style='color: #a1a1aa;'>Raw Feed</h4>", unsafe_allow_html=True)
+        st.markdown("<div class='image-panel d-4'>", unsafe_allow_html=True)
+        st.image(pil_image, use_container_width=True)
+        st.markdown("</div>", unsafe_allow_html=True)
+        
+    with col_right:
+        st.markdown("<h4 style='color: white;'>Machine Vision Out</h4>", unsafe_allow_html=True)
+        st.markdown("<div class='image-panel d-5'>", unsafe_allow_html=True)
+        st.image(annotated_img, channels="RGB", use_container_width=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
-        with right:
-            st.markdown("#### 🎯 Detections")
-            st.image(annotated_img, channels="RGB", use_container_width=True)
+    st.markdown("<br><br>", unsafe_allow_html=True)
 
-        # ── Detection Table ──
-        if detections:
-            st.markdown("#### 📊 Detection Details")
-
-            for det in detections:
-                icon = CLASS_ICONS.get(det["cls_id"], "⚪")
-                badge_class = "utility-badge" if det["cls_id"] == 0 else "cavity-badge"
-                st.markdown(
-                    f'<div class="detection-card">'
-                    f'<span class="{badge_class}">{icon} {det["Class"]}</span>'
-                    f'&nbsp;&nbsp; Confidence: <strong>{det["Confidence"]}</strong>'
-                    f'&nbsp;&nbsp; Box: ({det["X1"]}, {det["Y1"]}) → ({det["X2"]}, {det["Y2"]})'
-                    f'</div>',
-                    unsafe_allow_html=True,
-                )
-        else:
-            st.info("No buried objects detected in this image. Try lowering the confidence threshold.")
+    # ── DETECTION LOG ──
+    if detections:
+        st.markdown("<h3 style='color: white;'>Signature Log</h3>", unsafe_allow_html=True)
+        
+        # Calculate dynamic delay for list items
+        for i, det in enumerate(detections):
+            badge_type = "badge-utility" if det["cls_id"] == 0 else "badge-cavity"
+            conf_pct = det["Confidence"] * 100
+            
+            # Confidence bar length
+            bar_color = "#38bdf8" if det["cls_id"] == 0 else "#f43f5e"
+            
+            st.markdown(f"""
+            <div class="detection-row" style="animation-delay: {0.1 + (i*0.05)}s;">
+                <div class="det-left">
+                    <div class="badge {badge_type}">{det["Class"]}</div>
+                    <div style="width: 120px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
+                        <div style="width: {conf_pct}%; height: 100%; background: {bar_color};"></div>
+                    </div>
+                    <span style="font-weight: 700; color: white;">{conf_pct:.1f}%</span>
+                </div>
+                <div class="det-right">
+                    <span class="det-coords">({det['X1']}, {det['Y1']}) ↗ ({det['X2']}, {det['Y2']})</span>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
     else:
-        # No model — just show the uploaded image
-        st.image(pil_image, caption="Uploaded image (no model loaded)", use_container_width=True)
-
-else:
-    # No image uploaded — show upload prompt
-    st.markdown("""
-    <div class="upload-section">
-        <h3 style="color: rgba(255,255,255,0.7); margin-top: 0;">👆 Upload an image to get started</h3>
-        <p style="color: rgba(255,255,255,0.4);">Supported formats: JPG, JPEG, PNG</p>
-    </div>
-    """, unsafe_allow_html=True)
+        st.markdown("""
+        <div style="text-align:center; padding: 4rem; background: rgba(24,24,27,0.3); border-radius: 20px; border: 1px dashed rgba(255,255,255,0.1);">
+            <h4 style="color:#71717a; margin:0;">Zero signatures detected at current confidence threshold.</h4>
+        </div>
+        """, unsafe_allow_html=True)
