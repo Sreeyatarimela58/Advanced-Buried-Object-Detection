@@ -213,7 +213,7 @@ with st.sidebar:
     st.markdown("### ⚙️ Settings")
 
     # Model path
-    default_model = "runs/detect/sanity_check/weights/best.pt"
+    default_model = "runs/detect/gpr_multiclass/weights/best.pt"
     model_path = st.text_input(
         "Model path",
         value=default_model,
