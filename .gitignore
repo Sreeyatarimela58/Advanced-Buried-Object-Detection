@@ -5,7 +5,8 @@ __pycache__/
 
 # C extensions
 *.so
-
+runs/
+yolo_dataset/
 # Distribution / packaging
 .Python
 build/
@@ -31,6 +32,8 @@ MANIFEST
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
+
+.venv
 
 # Installer logs
 pip-log.txt

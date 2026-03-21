@@ -1,0 +1,11 @@
+# YOLOv8 Dataset Configuration — Multi-Class GPR Buried Object Detection
+# Classes:
+#   0: utility  — underground pipes, cables (hyperbola pattern)
+#   1: cavity   — underground voids (hyperbola pattern)
+
+path: ./yolo_dataset
+train: images/train
+val: images/val
+
+nc: 2
+names: ['utility', 'cavity']

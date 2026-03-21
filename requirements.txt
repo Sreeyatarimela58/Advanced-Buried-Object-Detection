@@ -1,0 +1,7 @@
+opencv-python
+scipy
+numpy
+tqdm
+ultralytics
+streamlit
+Pillow

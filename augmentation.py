@@ -107,8 +107,8 @@ def augment_gpr_data(input_folder, output_folder, augmentations):
 
 
 # Specify input/output folders and augmentations
-input_folder = "Path/to/GPR/images/folder"  # Replace with your GPR images folder
-output_folder = "Output/path"  # Replace with your desired output folder
+input_folder = "GPR_Data/Utilities"  # Replace with your GPR images folder
+output_folder = "GPR_Data/Utilities/augmented_images"  # Replace with your desired output folder
 
 augmentations = [
     (add_noise, {"mean": 0, "std": 0.15}),
