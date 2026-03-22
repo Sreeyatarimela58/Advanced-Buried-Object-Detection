@@ -291,7 +291,7 @@ with st.sidebar:
     st.markdown("<p style='color:#a1a1aa; font-weight:600; font-size:0.8rem; text-transform:uppercase; letter-spacing:1px;'>Model Configuration</p>", unsafe_allow_html=True)
     
     # Sleek Model Path Input
-    default_model = "runs/detect/gpr_multiclass/weights/best.pt"
+    default_model = "models/best_model.pt"
     model_path = st.text_input(
         "Weights Path",
         value=default_model,
