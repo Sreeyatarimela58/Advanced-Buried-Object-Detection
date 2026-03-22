@@ -3,20 +3,11 @@
 Premium Streamlit Evaluation Interface for GPR Buried Object Detection.
 """
 
-import sys
-import subprocess
 import streamlit as st
 import numpy as np
 from PIL import Image
 import os
-
-# Self-healing OpenCV import for Streamlit Community Cloud's broken Debian dependencies
-try:
-    import cv2
-except ImportError:
-    subprocess.check_call([sys.executable, "-m", "pip", "uninstall", "-y", "opencv-python", "opencv-python-headless"])
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "opencv-python-headless"])
-    import cv2
+import cv2
 
 # ──────────────────────────────────────────────
 # Page Configuration
@@ -300,7 +291,7 @@ with st.sidebar:
     st.markdown("<p style='color:#a1a1aa; font-weight:600; font-size:0.8rem; text-transform:uppercase; letter-spacing:1px;'>Model Configuration</p>", unsafe_allow_html=True)
     
     # Sleek Model Path Input
-    default_model = "models/best_model.pt"
+    default_model = "runs/detect/gpr_multiclass/weights/best.pt"
     model_path = st.text_input(
         "Weights Path",
         value=default_model,
