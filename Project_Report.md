@@ -130,7 +130,13 @@ A model's structural metrics must be easily verifiable by human operators. To ac
 4.  **Adjustable Confidence Thresholding:** A sidebar slider allows the operator to dynamically lower or raise the minimum requirement (0.00 to 1.00) for a detected object to be drawn on screen. If set to `0.25`, the model will only draw boxes it is at least 25% sure contain a hyperbola.
 5.  **Dynamic Telemetry Table:** The UI renders a structured readout indicating the exact Class Name, the percentage Confidence, and the exact `(X1, Y1) → (X2, Y2)` pixel coordinates of the bounding box.
 
-The Streamlit interface successfully bridges the gap between deep machine learning architecture and actionable human insight, completing the automated pipeline.
+The Streamlit interface successfully bridges the gap between deep machine learning architecture and actionable human insight, completing the automated pipeline locally.
+
+### Cloud Deployment Strategy (Streamlit Community Cloud)
+Deploying the `app.py` interface to Streamlit Community Cloud required overcoming key platform-specific infrastructure challenges:
+1. **GitHub Tracking:** Ultralytics YOLO purposefully `gitignores` the `runs/` directory where model weights are saved. To allow Streamlit Cloud access to the `best.pt` weights, the file was strategically extracted into a dedicated, tracked `models/` directory.
+2. **Linux GUI Dependency Hell:** Standard `opencv-python` (forced by the YOLOv8 package) fundamentally requires system-level GUI drivers (`libGL.so.1`, `libgthread-2.0.so.0`). On Streamlit's minimal containerized Debian instances, installing these via `apt` (`packages.txt`) frequently fails due to unresolved dependencies like `libffi7` on their mixed repositories.
+3. **Self-Healing Python Patch:** Instead of relying on brittle system-level `apt-get` commands, a robust **self-healing script** was injected directly at the top of `app.py`. If the script detects an `ImportError` when loading `cv2`, it uses `subprocess.check_call()` to dynamically `pip uninstall` the broken standard OpenCV installation mid-boot and forcibly recompiles `opencv-python-headless`. This guarantees an error-free boot sequence without native GUI library requirements.
 
 ---
 
