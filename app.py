@@ -3,11 +3,20 @@
 Premium Streamlit Evaluation Interface for GPR Buried Object Detection.
 """
 
+import sys
+import subprocess
 import streamlit as st
 import numpy as np
 from PIL import Image
 import os
-import cv2
+
+# Self-healing OpenCV import for Streamlit Community Cloud's broken Debian dependencies
+try:
+    import cv2
+except ImportError:
+    subprocess.check_call([sys.executable, "-m", "pip", "uninstall", "-y", "opencv-python", "opencv-python-headless"])
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "opencv-python-headless"])
+    import cv2
 
 # ──────────────────────────────────────────────
 # Page Configuration
