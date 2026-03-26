@@ -317,7 +317,7 @@ metrics = model.val()
 print(f"mAP50: {metrics.box.map50:.3f}")
 print(f"mAP50-95: {metrics.box.map:.3f}")
 
-# Predict
+# Predict it
 results = model.predict('path/to/gpr_image.jpg', conf=0.25)
 ```
 
