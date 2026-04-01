@@ -1,4 +1,4 @@
-# Advanced Buried Object Detection (GPR)
+# Deep Learning Based Advanced Buried Object Detection
 
 This project provides an end-to-end deep learning pipeline for detecting and classifying buried objects from Ground Penetrating Radar (GPR) imagery. It features a complete workflow from raw dataset processing and data augmentation to **YOLOv8** multi-class model training and an interactive **Streamlit** evaluation web interface.
 
