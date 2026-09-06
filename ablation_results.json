@@ -67,5 +67,97 @@
       "cavity_recall": 0.9717,
       "cavity_mAP50": 0.9733
     }
+  },
+  "3": {
+    "run_id": 3,
+    "name": "run3_no_rotation",
+    "excluded_augmentation": "rotation",
+    "desc": "All ON except Rotation",
+    "status": "completed",
+    "weights": "/home/mac/Projects/Advanced-Buried-Object-Detection/runs/detect/ablation/run3_no_rotation/weights/best.pt",
+    "train_images": 897,
+    "val_images": 232,
+    "total_images": 1129,
+    "metrics": {
+      "mAP50": 0.9513,
+      "mAP50-95": 0.5964,
+      "precision": 0.9534,
+      "recall": 0.9003,
+      "utility_precision": 0.962,
+      "utility_recall": 0.8286,
+      "utility_mAP50": 0.9281,
+      "cavity_precision": 0.9449,
+      "cavity_recall": 0.972,
+      "cavity_mAP50": 0.9744
+    }
+  },
+  "4": {
+    "run_id": 4,
+    "name": "run4_no_flip",
+    "excluded_augmentation": "flip",
+    "desc": "All ON except Horizontal Flip",
+    "status": "completed",
+    "weights": "/home/mac/Projects/Advanced-Buried-Object-Detection/runs/detect/ablation/run4_no_flip/weights/best.pt",
+    "train_images": 900,
+    "val_images": 229,
+    "total_images": 1129,
+    "metrics": {
+      "mAP50": 0.9651,
+      "mAP50-95": 0.5828,
+      "precision": 0.9487,
+      "recall": 0.9102,
+      "utility_precision": 0.9364,
+      "utility_recall": 0.8393,
+      "utility_mAP50": 0.9432,
+      "cavity_precision": 0.9611,
+      "cavity_recall": 0.9811,
+      "cavity_mAP50": 0.9871
+    }
+  },
+  "5": {
+    "run_id": 5,
+    "name": "run5_no_elastic",
+    "excluded_augmentation": "elastic",
+    "desc": "All ON except Elastic Deformation",
+    "status": "completed",
+    "weights": "/home/mac/Projects/Advanced-Buried-Object-Detection/runs/detect/ablation/run5_no_elastic/weights/best.pt",
+    "train_images": 907,
+    "val_images": 222,
+    "total_images": 1129,
+    "metrics": {
+      "mAP50": 0.9487,
+      "mAP50-95": 0.5792,
+      "precision": 0.9458,
+      "recall": 0.9061,
+      "utility_precision": 0.9327,
+      "utility_recall": 0.8519,
+      "utility_mAP50": 0.9388,
+      "cavity_precision": 0.959,
+      "cavity_recall": 0.9604,
+      "cavity_mAP50": 0.9587
+    }
+  },
+  "6": {
+    "run_id": 6,
+    "name": "run6_no_spectral",
+    "excluded_augmentation": "spectral",
+    "desc": "All ON except Spectral Shift",
+    "status": "completed",
+    "weights": "/home/mac/Projects/Advanced-Buried-Object-Detection/runs/detect/ablation/run6_no_spectral/weights/best.pt",
+    "train_images": 905,
+    "val_images": 224,
+    "total_images": 1129,
+    "metrics": {
+      "mAP50": 0.9371,
+      "mAP50-95": 0.5711,
+      "precision": 0.9321,
+      "recall": 0.8781,
+      "utility_precision": 0.9141,
+      "utility_recall": 0.815,
+      "utility_mAP50": 0.9043,
+      "cavity_precision": 0.95,
+      "cavity_recall": 0.9413,
+      "cavity_mAP50": 0.9699
+    }
   }
 }

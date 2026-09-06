@@ -2,3 +2,7 @@ Run ID,Configuration,Excluded Augmentation,Status,Train Images,Val Images,mAP50,
 0,All 6 Augmentations ON (Baseline),None (Baseline),completed,1070,269,0.9595,0.6068,0.9518,0.9395,0.9463,0.9726
 1,All ON except Gaussian Noise,noise,completed,899,230,0.9812,0.6312,0.9703,0.9391,0.9734,0.989
 2,All ON except Time Shift,time_shift,completed,903,226,0.9583,0.5851,0.9451,0.9231,0.9432,0.9733
+3,All ON except Rotation,rotation,completed,897,232,0.9513,0.5964,0.9534,0.9003,0.9281,0.9744
+4,All ON except Horizontal Flip,flip,completed,900,229,0.9651,0.5828,0.9487,0.9102,0.9432,0.9871
+5,All ON except Elastic Deformation,elastic,completed,907,222,0.9487,0.5792,0.9458,0.9061,0.9388,0.9587
+6,All ON except Spectral Shift,spectral,completed,905,224,0.9371,0.5711,0.9321,0.8781,0.9043,0.9699
