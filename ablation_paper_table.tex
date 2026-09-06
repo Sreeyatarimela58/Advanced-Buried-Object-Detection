@@ -1,0 +1,12 @@
+\begin{table*}[t]
+\centering
+\caption{Leave-One-Out (LOO) Ablation Study on GPR Domain-Specific Augmentation Pipeline. Evaluated on YOLOv8 Nano across 50 epochs with identical hyperparameters and split partitions.}
+\label{tab:gpr_ablation}
+\begin{tabular}{cllcccccc}
+\hline
+\textbf{Run} & \textbf{Configuration} & \textbf{Excluded Augmentation} & $\mathbf{mAP_{50}}$ & $\mathbf{\Delta mAP_{50}}$ & $\mathbf{\% \Delta}$ & $\mathbf{mAP_{50-95}}$ & $\mathbf{Precision}$ & $\mathbf{Recall}$ \\
+\hline
+Run 0 & Baseline (All 6 Active) & None & \textbf{0.9595} & -- & -- & \textbf{0.6068} & \textbf{0.9518} & \textbf{0.9395} \\
+\hline
+\end{tabular}
+\end{table*}

@@ -1,0 +1,4 @@
+Run ID,Configuration,Excluded Augmentation,Status,Train Images,Val Images,mAP50,mAP50-95,Precision,Recall,Utility mAP50,Cavity mAP50
+0,All 6 Augmentations ON (Baseline),None (Baseline),completed,1070,269,0.9595,0.6068,0.9518,0.9395,0.9463,0.9726
+1,All ON except Gaussian Noise,noise,completed,899,230,0.9812,0.6312,0.9703,0.9391,0.9734,0.989
+2,All ON except Time Shift,time_shift,completed,903,226,0.9583,0.5851,0.9451,0.9231,0.9432,0.9733

@@ -1,0 +1,71 @@
+{
+  "0": {
+    "run_id": 0,
+    "name": "run0_baseline_all_on",
+    "excluded_augmentation": "None (Baseline)",
+    "desc": "All 6 Augmentations ON (Baseline)",
+    "status": "completed",
+    "weights": "models/best_model.pt",
+    "train_images": 1070,
+    "val_images": 269,
+    "total_images": 1339,
+    "metrics": {
+      "mAP50": 0.9595,
+      "mAP50-95": 0.6068,
+      "precision": 0.9518,
+      "recall": 0.9395,
+      "utility_mAP50": 0.9463,
+      "utility_precision": 0.937,
+      "utility_recall": 0.9118,
+      "cavity_mAP50": 0.9726,
+      "cavity_precision": 0.9668,
+      "cavity_recall": 0.9672
+    }
+  },
+  "1": {
+    "run_id": 1,
+    "name": "run1_no_noise",
+    "excluded_augmentation": "noise",
+    "desc": "All ON except Gaussian Noise",
+    "status": "completed",
+    "weights": "/home/mac/Projects/Advanced-Buried-Object-Detection/runs/detect/ablation/run1_no_noise/weights/best.pt",
+    "train_images": 899,
+    "val_images": 230,
+    "total_images": 1129,
+    "metrics": {
+      "mAP50": 0.9812,
+      "mAP50-95": 0.6312,
+      "precision": 0.9703,
+      "recall": 0.9391,
+      "utility_precision": 0.9529,
+      "utility_recall": 0.9059,
+      "utility_mAP50": 0.9734,
+      "cavity_precision": 0.9877,
+      "cavity_recall": 0.9722,
+      "cavity_mAP50": 0.989
+    }
+  },
+  "2": {
+    "run_id": 2,
+    "name": "run2_no_time_shift",
+    "excluded_augmentation": "time_shift",
+    "desc": "All ON except Time Shift",
+    "status": "completed",
+    "weights": "/home/mac/Projects/Advanced-Buried-Object-Detection/runs/detect/ablation/run2_no_time_shift/weights/best.pt",
+    "train_images": 903,
+    "val_images": 226,
+    "total_images": 1129,
+    "metrics": {
+      "mAP50": 0.9583,
+      "mAP50-95": 0.5851,
+      "precision": 0.9451,
+      "recall": 0.9231,
+      "utility_precision": 0.9377,
+      "utility_recall": 0.8746,
+      "utility_mAP50": 0.9432,
+      "cavity_precision": 0.9526,
+      "cavity_recall": 0.9717,
+      "cavity_mAP50": 0.9733
+    }
+  }
+}
