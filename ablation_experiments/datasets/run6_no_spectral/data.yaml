@@ -1,0 +1,9 @@
+# Ablation Run 6: run6_no_spectral
+# Excluded Augmentation: spectral
+
+path: /home/mac/Projects/Advanced-Buried-Object-Detection/ablation_experiments/datasets/run6_no_spectral
+train: images/train
+val: images/val
+
+nc: 2
+names: ['utility', 'cavity']
