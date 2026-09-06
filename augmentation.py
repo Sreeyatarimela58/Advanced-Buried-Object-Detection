@@ -79,45 +79,121 @@ def spectral_shift(image, shift):
     return np.abs(np.fft.ifft2(shifted_image)).astype(np.uint8)
 
 
+# Augmentation Registry and Suffix Mappings
+AUG_PARAM_REGISTRY = {
+    "noise": (add_noise, {"mean": 0, "std": 0.15}),
+    "time_shift": (time_shift, {"shift": 20}),
+    "rotation": (rotate_image, {"angle": 15}),
+    "flip": (flip_image, {"mode": 1}),
+    "elastic": (elastic_transform, {"alpha": 34, "sigma": 4}),
+    "spectral": (spectral_shift, {"shift": 100}),
+    "scale": (scale_image, {"zoom_factor": 1.2}),
+}
+
+# Ground truth suffix mappings in the GPR dataset
+AUG_SUFFIX_MAP = {
+    "noise": {"util": "aug_1", "cav": "aug_7", "name": "Gaussian Noise"},
+    "time_shift": {"util": "aug_2", "cav": "aug_8", "name": "Time Shift"},
+    "rotation": {"util": "aug_3", "cav": "aug_9", "name": "Rotation"},
+    "flip": {"util": "aug_4", "cav": "aug_11", "name": "Horizontal Flip"},
+    "elastic": {"util": "aug_5", "cav": "aug_12", "name": "Elastic Deformation"},
+    "spectral": {"util": "aug_6", "cav": "aug_13", "name": "Spectral Shift"},
+    "scale": {"util": None, "cav": "aug_10", "name": "Scale / Zoom"},
+}
+
+
+def get_active_augmentations(
+    noise=True,
+    time_shift=True,
+    rotation=True,
+    flip=True,
+    elastic=True,
+    spectral=True,
+    scale=False,
+):
+    """
+    Returns a list of (function, kwargs) tuples based on active flags.
+    Allows enabling/disabling any technique for ablation studies.
+    """
+    selected = []
+    flags = [
+        ("noise", noise),
+        ("time_shift", time_shift),
+        ("rotation", rotation),
+        ("flip", flip),
+        ("elastic", elastic),
+        ("spectral", spectral),
+        ("scale", scale),
+    ]
+    for name, enabled in flags:
+        if enabled and name in AUG_PARAM_REGISTRY:
+            selected.append(AUG_PARAM_REGISTRY[name])
+    return selected
+
+
 # Main function to apply augmentations
-def augment_gpr_data(input_folder, output_folder, augmentations):
-    """Apply augmentations to GPR data in the input folder."""
+def augment_gpr_data(input_folder, output_folder, augmentations=None, **kwargs):
+    """
+    Apply augmentations to GPR data in the input folder.
+    If augmentations is None, uses get_active_augmentations(**kwargs).
+    """
+    if augmentations is None:
+        augmentations = get_active_augmentations(**kwargs)
+
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
 
-    image_files = [f for f in os.listdir(input_folder) if f.lower().endswith('.jpg')]
+    image_files = [f for f in os.listdir(input_folder) if f.lower().endswith(('.jpg', '.jpeg', '.png'))]
+
+    print(f"Applying {len(augmentations)} active augmentation(s) to {len(image_files)} images from {input_folder}...")
 
     for image_file in tqdm(image_files, desc="Augmenting images"):
-        # Load image as grayscale
         image_path = os.path.join(input_folder, image_file)
         image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
-        image = cv2.resize(image,(224,224))
-        # Apply augmentations
-        augmented_images = []
-        for func, params in augmentations:
-            augmented_image = func(image, **params)
-            augmented_images.append(augmented_image)
+        if image is None:
+            continue
+        image = cv2.resize(image, (224, 224))
 
-        # Save augmented images
         base_name = os.path.splitext(image_file)[0]
-        for i, aug_image in enumerate(augmented_images):
+        for i, (func, params) in enumerate(augmentations):
+            augmented_image = func(image, **params)
             aug_file = f"{base_name}_aug_{i + 1}.jpg"
             aug_path = os.path.join(output_folder, aug_file)
-            cv2.imwrite(aug_path, aug_image)
+            cv2.imwrite(aug_path, augmented_image)
 
 
-# Specify input/output folders and augmentations
-input_folder = "GPR_Data/Utilities"  # Replace with your GPR images folder
-output_folder = "GPR_Data/Utilities/augmented_images"  # Replace with your desired output folder
+def parse_args():
+    import argparse
+    parser = argparse.ArgumentParser(description="Apply toggleable domain-specific GPR data augmentations")
+    parser.add_argument("--input", type=str, default="GPR_data/Utilities", help="Input folder with GPR profiles")
+    parser.add_argument("--output", type=str, default="GPR_data/Utilities/augmented_images", help="Output folder")
+    parser.add_argument("--no-noise", action="store_true", help="Disable Gaussian noise")
+    parser.add_argument("--no-time-shift", action="store_true", help="Disable horizontal time shift")
+    parser.add_argument("--no-rotation", action="store_true", help="Disable rotation")
+    parser.add_argument("--no-flip", action="store_true", help="Disable horizontal flip")
+    parser.add_argument("--no-elastic", action="store_true", help="Disable elastic deformation")
+    parser.add_argument("--no-spectral", action="store_true", help="Disable FFT spectral shift")
+    parser.add_argument("--scale", action="store_true", help="Enable scale / zoom")
+    parser.add_argument("--disable", type=str, default=None, help="Comma-separated techniques to disable (e.g. noise,rotation)")
+    return parser.parse_args()
 
-augmentations = [
-    (add_noise, {"mean": 0, "std": 0.15}),
-    (time_shift, {"shift": 20}),
-    (rotate_image, {"angle": 15}),
-    (flip_image, {"mode": 1}),
-    (elastic_transform, {"alpha": 34, "sigma": 4}),
-    (spectral_shift, {"shift": 100}),
-]
 
-# Run augmentation
-augment_gpr_data(input_folder, output_folder, augmentations)
+if __name__ == "__main__":
+    args = parse_args()
+
+    disabled_set = set()
+    if args.disable:
+        disabled_set = {s.strip().lower() for s in args.disable.split(",")}
+
+    active_augs = get_active_augmentations(
+        noise=not args.no_noise and "noise" not in disabled_set,
+        time_shift=not args.no_time_shift and "time_shift" not in disabled_set,
+        rotation=not args.no_rotation and "rotation" not in disabled_set,
+        flip=not args.no_flip and "flip" not in disabled_set,
+        elastic=not args.no_elastic and "elastic" not in disabled_set,
+        spectral=not args.no_spectral and "spectral" not in disabled_set,
+        scale=args.scale and "scale" not in disabled_set,
+    )
+
+    augment_gpr_data(args.input, args.output, active_augs)
+

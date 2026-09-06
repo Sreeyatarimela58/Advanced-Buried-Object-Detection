@@ -1,0 +1,9 @@
+# Ablation Run 1: run1_no_noise
+# Excluded Augmentation: noise
+
+path: /home/mac/Projects/Advanced-Buried-Object-Detection/ablation_experiments/datasets/run1_no_noise
+train: images/train
+val: images/val
+
+nc: 2
+names: ['utility', 'cavity']

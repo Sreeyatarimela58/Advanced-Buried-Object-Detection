@@ -1,0 +1,9 @@
+# Ablation Run 2: run2_no_time_shift
+# Excluded Augmentation: time_shift
+
+path: /home/mac/Projects/Advanced-Buried-Object-Detection/ablation_experiments/datasets/run2_no_time_shift
+train: images/train
+val: images/val
+
+nc: 2
+names: ['utility', 'cavity']
