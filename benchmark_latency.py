@@ -1,62 +1,75 @@
 # -*- coding: utf-8 -*-
 """
-Professional Latency & Throughput Benchmark for YOLOv8 GPR Buried Object Detection.
+Empirical Latency & Throughput Benchmark for Phase 2 Models on Laptop CPU.
+Benchmarks:
+  - YOLOv8 Nano
+  - YOLOv5 Nano
+  - YOLO11 Nano
+  - YOLOv8 Small
 
-Computes:
-  - Pre-processing latency (ms)
-  - Pure Neural Network Inference latency (ms)
-  - Post-processing / NMS latency (ms)
-  - Total latency per patch (ms)
-  - Real-time Throughput (FPS)
-  - Model Parameters (Millions) & GFLOPs
-  - Mean, Median (P50), P95, and P99 latency distribution
-
-Usage:
-    python benchmark_latency.py
+Protocol:
+  - Input resolution: 224x224 px, batch size 1
+  - Device: CPU (fixed thread count logged)
+  - Iterations: 20 warm-up + 100 timed runs
+  - Measures: Mean, Std, Median (P50), P95, and Real-Time FPS (1000 / median_ms)
+  - Saves: results/model_comparison/latency_benchmark.json
 """
 
 import os
+import json
 import time
+from pathlib import Path
 import torch
 import numpy as np
 from ultralytics import YOLO
 
-MODEL_PATH = "models/best_model.pt"
+MODELS_TO_BENCHMARK = [
+    {"name": "yolov8n", "weights": "yolov8n.pt", "display": "YOLOv8 Nano"},
+    {"name": "yolov5nu", "weights": "yolov5nu.pt", "display": "YOLOv5 Nano"},
+    {"name": "yolo11n", "weights": "yolo11n.pt", "display": "YOLO11 Nano"},
+    {"name": "yolov8s", "weights": "yolov8s.pt", "display": "YOLOv8 Small"},
+]
+
 IMG_SIZE = 224
 NUM_WARMUP = 20
 NUM_TEST = 100
 
 
-def benchmark_model(model_path=MODEL_PATH, imgsz=IMG_SIZE, warmup=NUM_WARMUP, test_runs=NUM_TEST):
-    if not os.path.exists(model_path):
-        print(f"Error: Model not found at {model_path}")
-        return
-
-    print("=" * 70)
-    print(f"BENCHMARKING MODEL LATENCY & THROUGHPUT: {model_path}")
-    print("=" * 70)
-
-    # 1. Load Model
-    model = YOLO(model_path)
+def benchmark_single_model(model_info, imgsz=IMG_SIZE, warmup=NUM_WARMUP, test_runs=NUM_TEST):
+    weights_path = model_info["weights"]
+    display_name = model_info["display"]
     
-    # Calculate parameter count and FLOPs
+    print("\n" + "=" * 70)
+    print(f"BENCHMARKING: {display_name} ({weights_path})")
+    print("=" * 70)
+
+    model = YOLO(weights_path)
+    threads = torch.get_num_threads()
+    
+    # Model parameters & GFLOPs
     params = sum(p.numel() for p in model.model.parameters()) / 1e6
-    print(f"  Model Architecture:   {model.model.__class__.__name__} (YOLOv8 Nano)")
-    print(f"  Total Parameters:     {params:.2f} Million")
-    print(f"  Input Resolution:     {imgsz}x{imgsz} px (1 batch)")
-    print(f"  Inference Device:     CPU (Threads: {torch.get_num_threads()})")
+    try:
+        info = model.info(detailed=False)
+        gflops = round(float(info[3]), 2)
+    except Exception:
+        gflops = 0.0
+
+    print(f"  Architecture:     {model.model.__class__.__name__}")
+    print(f"  Parameters:       {params:.2f} M")
+    print(f"  GFLOPs:           {gflops}")
+    print(f"  Resolution:       {imgsz}x{imgsz} px (batch 1)")
+    print(f"  CPU Threads:      {threads}")
     print("-" * 70)
 
-    # 2. Prepare synthetic input matching GPR dimensions
     dummy_input = np.random.randint(0, 256, (imgsz, imgsz, 3), dtype=np.uint8)
 
-    # 3. Warm-up Phase
-    print(f"Warming up CPU cache & kernels ({warmup} iterations)...")
+    # 1. Warm-up
+    print(f"  Warming up cache ({warmup} runs)...")
     for _ in range(warmup):
         _ = model(dummy_input, imgsz=imgsz, verbose=False)
 
-    # 4. Latency Profiling Phase
-    print(f"Running timed inference ({test_runs} iterations)...")
+    # 2. Timed profiling
+    print(f"  Profiling {test_runs} timed runs...")
     pre_times = []
     inf_times = []
     post_times = []
@@ -64,65 +77,58 @@ def benchmark_model(model_path=MODEL_PATH, imgsz=IMG_SIZE, warmup=NUM_WARMUP, te
 
     for _ in range(test_runs):
         t0 = time.perf_counter()
-        results = model(dummy_input, imgsz=imgsz, verbose=False)
+        res = model(dummy_input, imgsz=imgsz, verbose=False)
         t1 = time.perf_counter()
 
-        # Extract per-stage timings from Ultralytics results if available
-        speed = results[0].speed  # dict with 'preprocess', 'inference', 'postprocess' in ms
+        speed = res[0].speed
         pre_times.append(speed.get("preprocess", 0.0))
         inf_times.append(speed.get("inference", 0.0))
         post_times.append(speed.get("postprocess", 0.0))
         total_times.append((t1 - t0) * 1000.0)
 
-    # 5. Statistical Calculations
-    mean_pre = np.mean(pre_times)
-    mean_inf = np.mean(inf_times)
-    mean_post = np.mean(post_times)
-    mean_total = np.mean(total_times)
-    std_total = np.std(total_times)
-    p50_total = np.percentile(total_times, 50)
-    p95_total = np.percentile(total_times, 95)
-    p99_total = np.percentile(total_times, 99)
-    fps = 1000.0 / mean_total
+    mean_total = float(np.mean(total_times))
+    std_total = float(np.std(total_times))
+    median_total = float(np.percentile(total_times, 50))
+    p95_total = float(np.percentile(total_times, 95))
+    fps = round(1000.0 / median_total, 1)
+
+    print(f"  Results:")
+    print(f"    Mean ± Std:     {mean_total:.2f} ± {std_total:.2f} ms")
+    print(f"    Median (P50):   {median_total:.2f} ms")
+    print(f"    95th Pct (P95): {p95_total:.2f} ms")
+    print(f"    Throughput:     {fps:.1f} FPS")
+
+    return {
+        "display_name": display_name,
+        "weights": weights_path,
+        "params_M": round(params, 2),
+        "gflops": gflops,
+        "threads": threads,
+        "mean_ms": round(mean_total, 2),
+        "std_ms": round(std_total, 2),
+        "median_ms": round(median_total, 2),
+        "p95_ms": round(p95_total, 2),
+        "fps": fps,
+    }
+
+
+def main():
+    out_dir = Path("results/model_comparison")
+    out_dir.mkdir(parents=True, exist_ok=True)
+    all_latencies = {}
+
+    for m_info in MODELS_TO_BENCHMARK:
+        res = benchmark_single_model(m_info)
+        all_latencies[m_info["name"]] = res
+
+    out_file = out_dir / "latency_benchmark.json"
+    with open(out_file, "w", encoding="utf-8") as fp:
+        json.dump(all_latencies, fp, indent=4)
 
     print("\n" + "=" * 70)
-    print("EMPIRICAL LATENCY & COMPUTATIONAL BENCHMARK RESULTS")
+    print(f"[BENCHMARK COMPLETE] Saved all model latencies to {out_file}")
     print("=" * 70)
-    print(f"  Pre-process Latency:       {mean_pre:6.2f} ms")
-    print(f"  Pure Inference Latency:    {mean_inf:6.2f} ms")
-    print(f"  Post-process (NMS) Latency:{mean_post:6.2f} ms")
-    print("  " + "-" * 40)
-    print(f"  Total Latency (Mean ± Std):{mean_total:6.2f} ± {std_total:.2f} ms")
-    print(f"  Median Latency (P50):      {p50_total:6.2f} ms")
-    print(f"  95th Percentile (P95):     {p95_total:6.2f} ms")
-    print(f"  99th Percentile (P99):     {p99_total:6.2f} ms")
-    print(f"  Throughput (FPS):          {fps:6.1f} frames/sec")
-    print("=" * 70)
-
-    # 6. Generate Publication-Ready LaTeX & Markdown Snippets
-    generate_latency_table(params, mean_pre, mean_inf, mean_post, mean_total, fps)
-
-
-def generate_latency_table(params, pre, inf, post, total, fps):
-    md_content = f"""# Model Computational Complexity & Latency Benchmark
-
-| Metric | Measured Value | Academic Description |
-| :--- | :---: | :--- |
-| **Model Size** | `{params:.2f} M` | Total trainable parameters in YOLOv8 Nano |
-| **Input Resolution** | `224 × 224` | Patch size (compatible with CNN receptive fields) |
-| **Pre-process Time** | `{pre:.2f} ms` | Resizing, color normalization, tensor casting |
-| **Inference Time** | `{inf:.2f} ms` | Forward neural network backbone & head computation |
-| **Post-process Time (NMS)** | `{post:.2f} ms` | Non-Maximum Suppression and coordinate re-scaling |
-| **Total Pipeline Latency** | **`{total:.2f} ms`** | End-to-end latency per single GPR patch |
-| **Throughput (FPS)** | **`{fps:.1f} FPS`** | Real-time processing speed on standard CPU |
-
-### Publication Paragraph for Results Section:
-> *"The proposed YOLOv8 Nano architecture consists of {params:.2f} million parameters. When evaluated on standard multi-core CPU hardware with 224×224 input patches, the model achieves an average end-to-end latency of {total:.2f} ms per B-scan patch (consisting of {pre:.2f} ms pre-processing, {inf:.2f} ms forward inference, and {post:.2f} ms post-processing). This corresponds to a real-time throughput of {fps:.1f} frames per second (FPS), comfortably exceeding typical field cart survey speeds (1–5 FPS), thereby demonstrating feasibility for real-time edge deployment."*
-"""
-    with open("latency_benchmark.md", "w", encoding="utf-8") as f:
-        f.write(md_content)
-    print("\n✓ Latency report saved to: latency_benchmark.md")
 
 
 if __name__ == "__main__":
-    benchmark_model()
+    main()

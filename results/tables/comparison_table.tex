@@ -1,0 +1,16 @@
+\begin{table*}[htbp]
+\caption{Performance, Complexity, and Latency Benchmark of Lightweight Detectors on Grouped 5-Fold Cross-Validation}
+\label{tab:model_comparison}
+\centering
+\begin{tabular}{lcccccccc}
+\hline
+\textbf{Model} & \textbf{mAP50} & \textbf{mAP50-95} & \textbf{F1-Score} & \textbf{Params (M)} & \textbf{GFLOPs} & \textbf{CPU Latency (ms)} & \textbf{FPS} \\
+\hline
+YOLOv8 Nano (Proposed) & 0.7609 $\pm$ 0.0688 & 0.3504 $\pm$ 0.0701 & 0.7351 $\pm$ 0.0487 & 3.138 & 8.75 & 9.77 & 102.4 \\
+YOLOv5 Nano (Predecessor) & 0.7450 $\pm$ 0.1029 & 0.3552 $\pm$ 0.0729 & 0.7197 $\pm$ 0.0887 & 2.636 & 7.73 & 10.81 & 92.5 \\
+YOLO11 Nano (Next-Gen) & 0.7290 $\pm$ 0.0649 & 0.3424 $\pm$ 0.0447 & 0.7067 $\pm$ 0.0990 & 2.605 & 6.57 & 11.12 & 89.9 \\
+YOLOv8 Small (Capacity Scaling) & 0.7140 $\pm$ 0.0898 & 0.3485 $\pm$ 0.0606 & 0.7069 $\pm$ 0.0753 & 11.136 & 28.64 & 20.40 & 49.0 \\
+\hline
+\end{tabular}
+\end{table*}
+

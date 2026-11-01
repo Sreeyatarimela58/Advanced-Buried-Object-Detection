@@ -1,0 +1,13 @@
+\begin{table}[htbp]
+\caption{Performance Comparison: Leaky Augmented Split vs.\ Honest Grouped 5-Fold Cross-Validation}
+\label{tab:baseline_comparison}
+\centering
+\begin{tabular}{lccccc}
+\hline
+\textbf{Evaluation Setup} & \textbf{mAP50} & \textbf{mAP50-95} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-Score} \\
+\hline
+Augmented-split (old, leaky) & 0.9595 & 0.6068 & 0.9520 & 0.9390 & 0.9456 \\
+Grouped 5-fold (new, honest) & 0.7390 $\pm$ 0.0746 & 0.3309 $\pm$ 0.0348 & 0.7407 $\pm$ 0.0573 & 0.7054 $\pm$ 0.0561 & 0.7225 $\pm$ 0.0560 \\
+\hline
+\end{tabular}
+\end{table}

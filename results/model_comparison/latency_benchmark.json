@@ -1,0 +1,50 @@
+{
+    "yolov8n": {
+        "display_name": "YOLOv8 Nano",
+        "weights": "yolov8n.pt",
+        "params_M": 3.16,
+        "gflops": 8.86,
+        "threads": 10,
+        "mean_ms": 9.83,
+        "std_ms": 1.09,
+        "median_ms": 9.77,
+        "p95_ms": 11.65,
+        "fps": 102.4
+    },
+    "yolov5nu": {
+        "display_name": "YOLOv5 Nano",
+        "weights": "yolov5nu.pt",
+        "params_M": 2.65,
+        "gflops": 7.84,
+        "threads": 8,
+        "mean_ms": 11.11,
+        "std_ms": 3.01,
+        "median_ms": 10.81,
+        "p95_ms": 14.17,
+        "fps": 92.5
+    },
+    "yolo11n": {
+        "display_name": "YOLO11 Nano",
+        "weights": "yolo11n.pt",
+        "params_M": 2.62,
+        "gflops": 6.67,
+        "threads": 8,
+        "mean_ms": 11.66,
+        "std_ms": 2.43,
+        "median_ms": 11.12,
+        "p95_ms": 15.5,
+        "fps": 89.9
+    },
+    "yolov8s": {
+        "display_name": "YOLOv8 Small",
+        "weights": "yolov8s.pt",
+        "params_M": 11.17,
+        "gflops": 28.81,
+        "threads": 8,
+        "mean_ms": 20.57,
+        "std_ms": 2.26,
+        "median_ms": 20.4,
+        "p95_ms": 24.08,
+        "fps": 49.0
+    }
+}

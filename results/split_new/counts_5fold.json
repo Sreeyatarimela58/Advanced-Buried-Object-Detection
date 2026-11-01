@@ -1,0 +1,52 @@
+[
+    {
+        "fold": "fold_1",
+        "utility_images": 17,
+        "cavity_images": 16,
+        "intact_images": 15,
+        "total_images": 48,
+        "utility_boxes": 24,
+        "cavity_boxes": 16,
+        "total_boxes": 40
+    },
+    {
+        "fold": "fold_2",
+        "utility_images": 18,
+        "cavity_images": 16,
+        "intact_images": 15,
+        "total_images": 49,
+        "utility_boxes": 22,
+        "cavity_boxes": 18,
+        "total_boxes": 40
+    },
+    {
+        "fold": "fold_3",
+        "utility_images": 18,
+        "cavity_images": 16,
+        "intact_images": 15,
+        "total_images": 49,
+        "utility_boxes": 21,
+        "cavity_boxes": 17,
+        "total_boxes": 38
+    },
+    {
+        "fold": "fold_4",
+        "utility_images": 18,
+        "cavity_images": 16,
+        "intact_images": 15,
+        "total_images": 49,
+        "utility_boxes": 18,
+        "cavity_boxes": 19,
+        "total_boxes": 37
+    },
+    {
+        "fold": "fold_5",
+        "utility_images": 60,
+        "cavity_images": 15,
+        "intact_images": 15,
+        "total_images": 90,
+        "utility_boxes": 79,
+        "cavity_boxes": 16,
+        "total_boxes": 95
+    }
+]

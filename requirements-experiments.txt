@@ -1,0 +1,17 @@
+# Unpinned on purpose. After a working install run: pip freeze > requirements-experiments.lock.txt
+# Old code used ultralytics 8.0; YOLO11 needs a newer release. Ask the user before changing versions if anything breaks.
+ultralytics
+torch
+torchvision
+torchmetrics
+pycocotools
+opencv-python-headless
+scikit-image
+scipy
+numpy
+pandas
+matplotlib
+seaborn
+grad-cam
+pyyaml
+tqdm

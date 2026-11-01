@@ -1,0 +1,29 @@
+[
+    {
+        "split": "train",
+        "total_images": 1129,
+        "utility_images": 637,
+        "cavity_images": 440,
+        "intact_images": 52,
+        "utility_instances": 834,
+        "cavity_instances": 479
+    },
+    {
+        "split": "val",
+        "total_images": 41,
+        "utility_images": 19,
+        "cavity_images": 11,
+        "intact_images": 11,
+        "utility_instances": 23,
+        "cavity_instances": 12
+    },
+    {
+        "split": "test",
+        "total_images": 46,
+        "utility_images": 21,
+        "cavity_images": 13,
+        "intact_images": 12,
+        "utility_instances": 24,
+        "cavity_instances": 14
+    }
+]
